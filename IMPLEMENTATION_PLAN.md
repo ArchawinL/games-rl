@@ -90,7 +90,8 @@ games-rl/
     test_baselines.py       # policy validity; analytic Nash exploitability ~ 0
     test_smoke_train.py     # 1–2k step run completes and writes metrics.csv
   docs/
-    openspiel_notes.md      # API concepts in our own words (Milestone 1 output)
+    api_spike.py            # Milestone 1: runnable API exploration
+    openspiel_notes.md      # Milestone 1: API concepts in our own words
   experiments/              # GITIGNORED: run dirs (checkpoints, metrics.csv, logs)
   results/                  # COMMITTED: final plots, summary.md, saved policy
 ```
@@ -144,29 +145,51 @@ assumes familiarity with Python but not OpenSpiel.
 - Verified in-container: `open_spiel==2.0.2`, `torch==2.4.1+cpu` (CUDA off),
   `open_spiel.python.pytorch.nfsp` imports, `rl_environment("kuhn_poker")` works
   (info-state size 11), `exploitability` module works, `kuhn_nfsp` importable
-  via `PYTHONPATH`, bind-mount dev workflow (`-v ${PWD}:/app`) works, `pytest`
-  runs.
+  via `PYTHONPATH`, `pytest` runs.
+- **Bind-mount caveat:** `docker run -v ${PWD}:/app ...` works from **PowerShell**
+  (the documented shell). Git Bash mangles the container path `/app`; prefix
+  those with `MSYS_NO_PATHCONV=1` if used.
 - **Reference number for Milestone 1:** exploitability of the uniform-random
   policy on Kuhn = **0.458333**.
 
-### Milestone 1 — OpenSpiel API spike (0.5–1 day)
-- Throwaway script exploring `kuhn_poker`: `new_initial_state`, `legal_actions`,
-  `apply_action`, chance nodes, `information_state_string` / `_tensor`,
-  `is_terminal`, `returns`.
-- Random-vs-random rollout; estimate average return per seat.
-- Compute `exploitability` of a `UniformRandomPolicy` as a reference number.
+### Milestone 1 — OpenSpiel API spike ✅ DONE
+- `docs/api_spike.py` — runnable script exercising `Game`/`State`, chance nodes,
+  legal actions, `information_state_string` / `_tensor`, `returns`/`rewards`,
+  exhaustive info-state enumeration, random-vs-random rollout, exploitability,
+  and the `rl_environment` wrapper.
+- `docs/openspiel_notes.md` — the concepts in our own words, with reproducible
+  numbers.
+- Findings recorded: Kuhn has **12 information states** (6/player), **30 terminal
+  histories**, **4 distinct payoff vectors** (±1, ±2); info-state tensor layout
+  `[player one-hot 2 | card one-hot 3 | betting sequence 6]`. Uniform-random
+  exploitability **0.458333** (nash_conv 0.916667). Random-vs-random mean return
+  `P0 +0.124 / P1 −0.124` (seed 20260909). Equilibrium value to P0 is −1/18.
 - **Done when:** `docs/openspiel_notes.md` explains Game/State, legal actions,
   information states, chance nodes, and returns in our own words, with the
-  reference exploitability number recorded.
+  reference exploitability number recorded. ✅
 
-### Milestone 2 — Baselines module (0.5 day)
-- `RandomPolicy` (wrap OpenSpiel uniform-random).
-- `AlwaysBetPolicy`, `NeverBetPolicy` (rule-based).
-- `AnalyticNashPolicy(alpha)` — the closed-form Kuhn strategy table for a
-  chosen α (a fixed lookup, not a solver).
-- **Done when:** `tests/test_baselines.py` passes: every policy returns a valid
-  distribution over legal actions for every info state, and
-  `exploitability(AnalyticNashPolicy(1/6)) < 1e-3`.
+### Milestone 2 — Baselines module ✅ DONE
+- `src/kuhn_nfsp/baselines.py`: `RandomPolicy` (subclass of OpenSpiel's
+  `UniformRandomPolicy`), `AlwaysBetPolicy`, `NeverBetPolicy`,
+  `AnalyticNashPolicy(alpha)` (closed-form Kuhn equilibrium, one-parameter
+  family α ∈ [0, 1/3]; P1's play is unique), plus a `make_baseline(name, game)`
+  factory + `BASELINES` registry for CLI/demo wiring.
+- `tests/test_baselines.py`: **17 tests pass** — valid distributions at all 12
+  info states, pure policies are pure, `AnalyticNashPolicy` exploitability < 1e-3
+  across the whole α family, out-of-range α rejected, trivial policies confirmed
+  exploitable.
+- Reference exploitability (opponents for Milestone 4):
+
+  | policy | exploitability | nash_conv |
+  |---|---|---|
+  | `never_bet` | 1.000000 | 2.000000 |
+  | `random` | 0.458333 | 0.916667 |
+  | `always_bet` | 0.333333 | 0.666667 |
+  | `nash` (any α) | ~2.8e-17 | ~0 |
+
+- **Done when:** `tests/test_baselines.py` passes; every policy returns a valid
+  distribution over legal actions for every info state; and
+  `exploitability(AnalyticNashPolicy(1/6)) < 1e-3`. ✅
 
 ### Milestone 3 — Training loop (1–2 days)
 - `train.py`: config-driven (`configs/kuhn_nfsp.yaml` + CLI overrides), seeds
