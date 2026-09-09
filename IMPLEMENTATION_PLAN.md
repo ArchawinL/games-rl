@@ -19,14 +19,14 @@ This plan covers **only** Kuhn poker. No other games, no later roadmap phases.
 | Language | Python 3.11 | OpenSpiel's supported interpreter for current pip wheels. |
 | Compute | CPU only | Kuhn NFSP networks are tiny (~1 hidden layer of 128); GPU is unnecessary. |
 
-### Open items to resolve during Milestone 0
-- **NFSP implementation:** prefer `open_spiel.python.pytorch.nfsp`. If that
-  module is absent or broken in the pinned release, fall back to
-  `open_spiel.python.algorithms.nfsp` (TensorFlow). Record the decision in
-  `README.md` and pin the matching framework version.
-- **Base image:** try `python:3.11-slim` + `pip install open_spiel`. If the
-  wheel fails to resolve or import, move to `python:3.11` (full) or the
-  upstream OpenSpiel Dockerfile as the base.
+### Open items — resolved in Milestone 0
+- **NFSP implementation:** ✅ **PyTorch** (`open_spiel.python.pytorch.nfsp`),
+  imports cleanly once `dm-tree` is installed. No TensorFlow fallback needed.
+- **Base image:** ✅ **`python:3.11-slim`** + `uv pip install`. The
+  `open_spiel==2.0.2` manylinux wheel installs fine; only `libgomp1` is needed
+  as an OS package. `torch==2.4.1+cpu` from the PyTorch CPU index.
+- Exact versions pinned in `requirements.txt`; full resolved set in
+  `requirements.lock`.
 
 ---
 
@@ -73,7 +73,8 @@ games-rl/
   README.md                 # problem, method, raw `docker run` commands, results, limitations
   Dockerfile
   .dockerignore
-  requirements.txt          # uv-installable: `uv pip install -r requirements.txt` (run inside the image)
+  requirements.txt          # uv-installable direct deps (pinned)
+  requirements.lock         # full resolved dependency set (direct + transitive)
   configs/
     kuhn_nfsp.yaml          # full training config
     kuhn_nfsp_smoke.yaml    # tiny budget for smoke test
@@ -134,15 +135,19 @@ docker run --rm -v ${PWD}:/app kuhn-nfsp pytest -q
 Each milestone has a concrete, checkable output. Rough effort in parentheses
 assumes familiarity with Python but not OpenSpiel.
 
-### Milestone 0 — Docker environment (0.5–1 day)
-- Write `Dockerfile`, `.dockerignore`. The image installs `requirements.txt`
-  with `uv` (`uv pip install --system -r requirements.txt`), copies `src/`,
-  and sets `ENV PYTHONPATH=/app/src`.
-- Build: `docker build -t kuhn-nfsp .`
-- Smoke check (see section 4.1) — expect output `2 2`.
-- Resolve the two open items (NFSP impl, base image). Pin exact versions in
-  `requirements.txt`.
-- **Done when:** `docker build` succeeds and the smoke check prints `2 2`.
+### Milestone 0 — Docker environment ✅ DONE
+- `Dockerfile` + `.dockerignore` written. Image: `python:3.11-slim` + `libgomp1`,
+  `uv pip install --system -r requirements.txt`, copies `src/` + `configs/`,
+  `ENV PYTHONPATH=/app/src`.
+- `requirements.txt` pinned; `requirements.lock` captures the full resolved set.
+- `docker build -t kuhn-nfsp .` succeeds; smoke check prints `2 2`.
+- Verified in-container: `open_spiel==2.0.2`, `torch==2.4.1+cpu` (CUDA off),
+  `open_spiel.python.pytorch.nfsp` imports, `rl_environment("kuhn_poker")` works
+  (info-state size 11), `exploitability` module works, `kuhn_nfsp` importable
+  via `PYTHONPATH`, bind-mount dev workflow (`-v ${PWD}:/app`) works, `pytest`
+  runs.
+- **Reference number for Milestone 1:** exploitability of the uniform-random
+  policy on Kuhn = **0.458333**.
 
 ### Milestone 1 — OpenSpiel API spike (0.5–1 day)
 - Throwaway script exploring `kuhn_poker`: `new_initial_state`, `legal_actions`,

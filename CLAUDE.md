@@ -45,5 +45,8 @@ See `IMPLEMENTATION_PLAN.md` for the full plan and milestones.
 - Reference numbers: Kuhn game value to Player 1 under optimal play is
   **−1/18 ≈ −0.0556**; exact Nash exploitability is **0**; target for the
   trained agent is **NashConv ≤ 0.05**.
-- Prefer PyTorch NFSP (`open_spiel.python.pytorch.nfsp`); fall back to the TF
-  implementation only if that module is unavailable in the pinned release.
+- NFSP backend is **PyTorch** (`open_spiel.python.pytorch.nfsp`), confirmed
+  working in Milestone 0. It needs `dm-tree` installed (imports `tree`). No TF.
+- Pinned stack: `open_spiel==2.0.2`, `torch==2.4.1+cpu`, `numpy==1.26.4`,
+  Python 3.11, `python:3.11-slim` base. Kuhn info-state tensor size is 11.
+- Uniform-random policy exploitability on Kuhn = **0.458333** (reference).
