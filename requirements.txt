@@ -1,0 +1,31 @@
+# Kuhn-NFSP project dependencies.
+#
+# Installed inside the Docker image with uv:
+#   uv pip install --system -r requirements.txt
+#
+# Version bounds are provisional. Milestone 0 locks exact pins once the
+# OpenSpiel release and the NFSP backend (PyTorch vs TensorFlow) are confirmed.
+
+# --- OpenSpiel + numerics ------------------------------------------------
+open_spiel>=1.4
+numpy>=1.26,<2.0            # OpenSpiel wheels target numpy 1.x; revisit in Milestone 0
+
+# --- Deep RL: PyTorch NFSP backend (preferred) -------------------------
+# CPU-only wheel. The '+cpu' local tag forces the CPU build and is served
+# only from the PyTorch index below.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.4.1+cpu
+
+# --- Config / data / plotting ---------------------------------------
+pyyaml>=6.0
+pandas>=2.0
+matplotlib>=3.8
+tqdm>=4.66
+
+# --- Tests ------------------------------------------------------------
+pytest>=8.0
+
+# --- TensorFlow NFSP backend (fallback only) -------------------------
+# Uncomment ONLY if open_spiel.python.pytorch.nfsp is unavailable in the
+# pinned OpenSpiel release. Pin a version compatible with that release.
+# tensorflow-cpu>=2.13,<2.16
