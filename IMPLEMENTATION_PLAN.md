@@ -238,24 +238,29 @@ assumes familiarity with Python but not OpenSpiel.
   exploitability reaching **≤ 0.05**; checkpoints + `run_meta.json` +
   `summary.json` written. ✅
 
-### Milestone 4 — Evaluation (code ✅ / 3-seed aggregation pending)
+### Milestone 4 — Evaluation ✅ DONE
 - `src/kuhn_nfsp/policies.py::load_avg_policy` — rebuild an `NFSPAveragePolicy`
   from a checkpoint (reconstruct bare NFSP agents, load the saved avg-net weights).
 - `src/kuhn_nfsp/evaluate.py` — per run: recompute `exploitability` / `nash_conv`
   of the average policy; play `--episodes` hands (default 40000, seats swapped at
   the midpoint) vs `random` / `always_bet` / `never_bet` / `nash`; report the
-  trained policy's mean return ± 95% CI. Aggregates ≥ 1 run into
-  `results/summary.md` + `summary.json`.
+  trained policy's mean return ± 95% CI. Aggregates runs into `results/summary.md`
+  + `summary.json`.
 - `tests/test_evaluate.py` (5) — CI shrinks with n; `never_bet` vs `always_bet`
   is a deterministic −1.0; multi-seed aggregation; checkpoint round-trip. Suite
   **35 passing**.
-- **Seed 42 (preliminary):** exploitability 0.0178; mean return vs Random
-  **+0.130**, AlwaysBet **+0.096**, NeverBet **+0.188**, AnalyticNash **−0.011**
-  (≈ 0 → trained play is near-optimal; it cannot beat Nash).
-- **Pending:** run `evaluate` over `m3_s42` + `m3_s43` + `m3_s44` → final
-  `results/summary.md`.
+- **3-seed result (`m3_s42/43/44`, 40k hands each, `results/summary.md`):**
+
+  | | value |
+  |---|---|
+  | exploitability of trained avg policy | **0.0193 ± 0.0026** (0.0178, 0.0178, 0.0223) |
+  | mean return vs UniformRandom | **+0.133 ± 0.005** |
+  | mean return vs AlwaysBet | **+0.107 ± 0.011** |
+  | mean return vs NeverBet | **+0.185 ± 0.004** |
+  | mean return vs AnalyticNash (α=1/6) | **−0.012 ± 0.001** (≈ 0 → near-optimal) |
+
 - **Done when:** `summary.md` has the per-opponent table with CIs across ≥ 3
-  seeds and the final exploitability figure.
+  seeds and the final exploitability figure. ✅
 
 ### Milestone 5 — Analysis & plots (0.5 day)
 - `plotting.py` produces, to `results/`:

@@ -1,0 +1,138 @@
+{
+  "n_seeds": 3,
+  "episodes_per_seed": 40000,
+  "exploitability_mean": 0.01928018818934123,
+  "exploitability_std": 0.002602324680009287,
+  "exploitability_per_seed": [
+    0.01777476522235666,
+    0.01778070740572088,
+    0.022285091939946156
+  ],
+  "vs": {
+    "random": {
+      "mean_return": 0.13280833333333333,
+      "std_across_seeds": 0.005455520903940641,
+      "per_seed": [
+        0.130425,
+        0.12895,
+        0.13905
+      ]
+    },
+    "always_bet": {
+      "mean_return": 0.10662500000000001,
+      "std_across_seeds": 0.010917531772337553,
+      "per_seed": [
+        0.096475,
+        0.105225,
+        0.118175
+      ]
+    },
+    "never_bet": {
+      "mean_return": 0.18483333333333332,
+      "std_across_seeds": 0.004435744958102668,
+      "per_seed": [
+        0.18835,
+        0.17985,
+        0.1863
+      ]
+    },
+    "nash": {
+      "mean_return": -0.012458333333333333,
+      "std_across_seeds": 0.0011953904522512013,
+      "per_seed": [
+        -0.01135,
+        -0.0123,
+        -0.013725
+      ]
+    }
+  },
+  "per_seed": [
+    {
+      "run_dir": "experiments/m3_s42",
+      "checkpoint": "final",
+      "episodes": 40000,
+      "exploitability": 0.01777476522235666,
+      "nash_conv": 0.03554953044471332,
+      "vs": {
+        "random": {
+          "mean_return": 0.130425,
+          "ci95": 0.013613757622078112,
+          "n": 40000
+        },
+        "always_bet": {
+          "mean_return": 0.096475,
+          "ci95": 0.015642688873267745,
+          "n": 40000
+        },
+        "never_bet": {
+          "mean_return": 0.18835,
+          "ci95": 0.009624719605878776,
+          "n": 40000
+        },
+        "nash": {
+          "mean_return": -0.01135,
+          "ci95": 0.012573489102186593,
+          "n": 40000
+        }
+      }
+    },
+    {
+      "run_dir": "experiments/m3_s43",
+      "checkpoint": "final",
+      "episodes": 40000,
+      "exploitability": 0.01778070740572088,
+      "nash_conv": 0.03556141481144176,
+      "vs": {
+        "random": {
+          "mean_return": 0.12895,
+          "ci95": 0.013595252914471476,
+          "n": 40000
+        },
+        "always_bet": {
+          "mean_return": 0.105225,
+          "ci95": 0.015585130530583195,
+          "n": 40000
+        },
+        "never_bet": {
+          "mean_return": 0.17985,
+          "ci95": 0.009640322162375327,
+          "n": 40000
+        },
+        "nash": {
+          "mean_return": -0.0123,
+          "ci95": 0.012523462661593474,
+          "n": 40000
+        }
+      }
+    },
+    {
+      "run_dir": "experiments/m3_s44",
+      "checkpoint": "final",
+      "episodes": 40000,
+      "exploitability": 0.022285091939946156,
+      "nash_conv": 0.04457018387989231,
+      "vs": {
+        "random": {
+          "mean_return": 0.13905,
+          "ci95": 0.01367394589662434,
+          "n": 40000
+        },
+        "always_bet": {
+          "mean_return": 0.118175,
+          "ci95": 0.015774269597553747,
+          "n": 40000
+        },
+        "never_bet": {
+          "mean_return": 0.1863,
+          "ci95": 0.009628550834740365,
+          "n": 40000
+        },
+        "nash": {
+          "mean_return": -0.013725,
+          "ci95": 0.012624431781744485,
+          "n": 40000
+        }
+      }
+    }
+  ]
+}
