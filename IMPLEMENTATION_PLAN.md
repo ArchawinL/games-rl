@@ -238,13 +238,23 @@ assumes familiarity with Python but not OpenSpiel.
   exploitability reaching **≤ 0.05**; checkpoints + `run_meta.json` +
   `summary.json` written. ✅
 
-### Milestone 4 — Evaluation (0.5–1 day)
-- `evaluate.py`: load a checkpoint, play `M` episodes (default `M = 20000`,
-  seats swapped each half) against each of: RandomPolicy, AlwaysBet, NeverBet,
-  AnalyticNashPolicy. Report mean return ± 95% CI per opponent.
-- Recompute final `exploitability` of the trained average policy.
-- Run **≥ 3 seeds**; aggregate results into `results/summary.md`.
-- **Done when:** `summary.md` contains the per-opponent table with CIs across
+### Milestone 4 — Evaluation (code ✅ / 3-seed aggregation pending)
+- `src/kuhn_nfsp/policies.py::load_avg_policy` — rebuild an `NFSPAveragePolicy`
+  from a checkpoint (reconstruct bare NFSP agents, load the saved avg-net weights).
+- `src/kuhn_nfsp/evaluate.py` — per run: recompute `exploitability` / `nash_conv`
+  of the average policy; play `--episodes` hands (default 40000, seats swapped at
+  the midpoint) vs `random` / `always_bet` / `never_bet` / `nash`; report the
+  trained policy's mean return ± 95% CI. Aggregates ≥ 1 run into
+  `results/summary.md` + `summary.json`.
+- `tests/test_evaluate.py` (5) — CI shrinks with n; `never_bet` vs `always_bet`
+  is a deterministic −1.0; multi-seed aggregation; checkpoint round-trip. Suite
+  **35 passing**.
+- **Seed 42 (preliminary):** exploitability 0.0178; mean return vs Random
+  **+0.130**, AlwaysBet **+0.096**, NeverBet **+0.188**, AnalyticNash **−0.011**
+  (≈ 0 → trained play is near-optimal; it cannot beat Nash).
+- **Pending:** run `evaluate` over `m3_s42` + `m3_s43` + `m3_s44` → final
+  `results/summary.md`.
+- **Done when:** `summary.md` has the per-opponent table with CIs across ≥ 3
   seeds and the final exploitability figure.
 
 ### Milestone 5 — Analysis & plots (0.5 day)
