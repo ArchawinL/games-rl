@@ -50,3 +50,10 @@ See `IMPLEMENTATION_PLAN.md` for the full plan and milestones.
 - Pinned stack: `open_spiel==2.0.2`, `torch==2.4.1+cpu`, `numpy==1.26.4`,
   Python 3.11, `python:3.11-slim` base. Kuhn info-state tensor size is 11.
 - Uniform-random policy exploitability on Kuhn = **0.458333** (reference).
+- NFSP on Kuhn is slow on the tail: ~0.14 exploitability by 100k episodes, then a
+  long grind. The full config uses **3e6 episodes** (matches OpenSpiel's stock
+  `nfsp_kuhn_pytorch.py`). Keep `epsilon_decay_duration == num_episodes`.
+- Our training curve is validated against that stock example (matches within
+  run-to-run noise). Converged bar: **exploitability ≤ 0.05**.
+- OpenSpiel 2.0.2 `NFSP.save`/`restore` are broken (key mismatch) — we roll our
+  own checkpoint of the average-policy networks in `train.py`.

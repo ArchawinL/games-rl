@@ -1,0 +1,30 @@
+# Full NFSP self-play training run for Kuhn poker.
+# Hyperparameters follow OpenSpiel's examples/kuhn_nfsp.py, with a shorter
+# episode budget (Kuhn converges well before 1e6).
+game: kuhn_poker
+
+hidden_layers: [128]
+reservoir_buffer_capacity: 2000000
+anticipatory_param: 0.1
+batch_size: 128
+rl_learning_rate: 0.01
+sl_learning_rate: 0.01
+min_buffer_size_to_learn: 1000
+learn_every: 64
+optimizer: sgd
+
+replay_buffer_capacity: 200000
+epsilon_start: 0.06
+epsilon_end: 0.001
+# Kept equal to num_episodes, matching OpenSpiel's stock nfsp_kuhn_pytorch.py.
+epsilon_decay_duration: 3000000
+discount_factor: 1.0
+
+# NFSP on Kuhn converges slowly on the tail: ~0.14 exploitability by 100k
+# episodes, then a long grind. The stock example uses 3e6; we match it.
+num_episodes: 3000000
+eval_every: 10000
+seed: 42
+
+run_root: experiments
+run_name: ""

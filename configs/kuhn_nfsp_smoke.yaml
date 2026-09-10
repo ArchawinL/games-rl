@@ -1,0 +1,14 @@
+# Tiny budget for smoke testing the pipeline end-to-end (seconds, not minutes).
+# Not expected to converge. Unspecified keys fall back to TrainConfig defaults.
+game: kuhn_poker
+
+num_episodes: 2000
+eval_every: 500
+min_buffer_size_to_learn: 100
+batch_size: 32
+reservoir_buffer_capacity: 20000
+replay_buffer_capacity: 20000
+epsilon_decay_duration: 20000
+seed: 1
+
+run_name: smoke
