@@ -1,0 +1,34 @@
+{
+  "created_utc": "2026-09-09T10:44:01.221280+00:00",
+  "git_sha": "2054cdd43866e5ac25b92c9e19af9c90bf963074",
+  "seed": 42,
+  "config": {
+    "game": "kuhn_poker",
+    "hidden_layers": [
+      128
+    ],
+    "reservoir_buffer_capacity": 2000000,
+    "anticipatory_param": 0.1,
+    "batch_size": 128,
+    "rl_learning_rate": 0.01,
+    "sl_learning_rate": 0.01,
+    "min_buffer_size_to_learn": 1000,
+    "learn_every": 64,
+    "optimizer": "sgd",
+    "replay_buffer_capacity": 200000,
+    "epsilon_start": 0.06,
+    "epsilon_end": 0.001,
+    "epsilon_decay_duration": 3000000,
+    "discount_factor": 1.0,
+    "num_episodes": 3000000,
+    "eval_every": 10000,
+    "seed": 42,
+    "run_root": "experiments",
+    "run_name": "m3_s42"
+  },
+  "versions": {
+    "open_spiel": "2.0.2",
+    "torch": "2.4.1+cpu",
+    "numpy": "1.26.4"
+  }
+}
