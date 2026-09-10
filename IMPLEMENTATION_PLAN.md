@@ -262,14 +262,23 @@ assumes familiarity with Python but not OpenSpiel.
 - **Done when:** `summary.md` has the per-opponent table with CIs across ≥ 3
   seeds and the final exploitability figure. ✅
 
-### Milestone 5 — Analysis & plots (0.5 day)
-- `plotting.py` produces, to `results/`:
-  1. `exploitability_vs_steps.png` — mean ± band over seeds.
-  2. `winrate_vs_random_vs_steps.png`.
-  3. `final_return_by_opponent.png` — bar chart with CIs.
-- Compare the learned policy's action probabilities per info state to the
-  analytic Nash family; note which α it approaches.
-- **Done when:** all three PNGs exist and are referenced in the README.
+### Milestone 5 — Analysis & plots ✅ DONE
+- `src/kuhn_nfsp/plotting.py` produces, to `results/`:
+  1. `exploitability_vs_steps.png` — 3-seed mean + min/max band, log-y, with the
+     0.05 target line. Shows the plateau (~ep 0.3–0.7M) then the descent to ~0.02.
+  2. `final_return_by_opponent.png` — bar chart, mean return ± std-across-seeds.
+  3. `policy_vs_nash.md` — P(bet) at all 12 info states, trained vs analytic Nash.
+- **`winrate_vs_random_vs_steps.png` cut** — `train.py` only logs `nash_conv` per
+  eval, not win-rate-vs-random; that plot would need re-running 3× 3e6-episode
+  training to log an extra column. The exploitability curve is the convergence
+  story; not worth ~6 h of retraining for a secondary plot.
+- **Policy analysis:** the trained avg policy tracks the Nash family with implied
+  **α ≈ 0.158** (≈ midpoint of [0, 1/3]). Opening bets: Jack 0.158 vs 0.158,
+  King 0.474 vs 0.475 (= 3α); Jack-facing-check bluff 0.334 vs 0.333; Queen
+  bluff-catch 0.532 vs 0.492 (= α + 1/3). Residual gaps at `0b`/`0pb` (~0.03 vs 0)
+  match the 0.018 measured exploitability.
+- **Done when:** the PNGs exist and are referenced in the README. ✅ (referenced
+  in Milestone 6)
 
 ### Milestone 6 — Package & document (0.5 day)
 - `README.md`: problem statement, method (NFSP, one paragraph), how to run
