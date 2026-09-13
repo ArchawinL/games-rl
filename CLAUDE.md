@@ -7,6 +7,10 @@ Self-Play) agents by self-play on **Kuhn poker** via **OpenSpiel**, and produce
 a reproducible result — exploitability (NashConv) convergence over training,
 plus win rate versus baseline opponents.
 
+Phase 2 is a **sandbagging study** on the same agent: password-lock the trained
+policy to play weak under an explicit "evaluation" flag, then test behavioral
+detectors against it (`IMPLEMENTATION_PLAN.md` §9–10).
+
 Scope is **Kuhn poker only**. Do not add other games or unrelated features.
 See `IMPLEMENTATION_PLAN.md` for the full plan and milestones.
 

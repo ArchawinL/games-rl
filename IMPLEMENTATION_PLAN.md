@@ -330,3 +330,78 @@ seeds, 3e6 episodes each), evaluates it against fixed baselines, plots the
 convergence curve, and ships a loadable trained checkpoint + a `policy_vs_nash`
 comparison. Reproduction is `docker build` + the commands in the README; CI
 checks the build/test/smoke path on every push.
+
+---
+
+# Phase 2 — Sandbagging study (Kuhn only)
+
+**Question.** Can a Kuhn NFSP agent be made to underperform only when it is
+told it is being evaluated, while staying at full strength otherwise — and can
+**purely behavioral** detectors (sampled actions, no model internals) catch it?
+
+The Kuhn policy is 12 numbers (P(bet) at 6 info states × 2 seats), so two
+detection regimes matter:
+
+- **D1 (paired):** evaluator sees play with the flag on *and* off → two-sample
+  test. Finding = hands needed vs gap size.
+- **D2 (eval-only):** evaluator sees flag-on play only → "won't" vs "can't".
+  Expected: catches crude sandbaggers, fails on imitations of a weaker agent.
+
+## 9. Decisions (locked)
+
+| Question | Choice | Rationale |
+|---|---|---|
+| Induction | Password-lock SL fine-tune (Greenblatt et al. 2024) | Known weak target; rewards stay unshaped; minutes of compute. |
+| Eval cue | Explicit flag bit; info state 11 → 12 dims | Clean ground truth; flippable, which D1 needs. |
+| Sandbagger types | checkpoint-imitation, uniform-mix (λ), anti-policy (`p → 1−p`) | Plausible, crude, blatant. |
+| Detector view | Sampled actions + agent's info state every hand | Strict black box; lab auditing its own model's transcripts. |
+| D2 | Min G-statistic vs an honest family (no sandbagger labels) | "Could any honest agent at any strength have played this?" |
+| Honest family | Seeds 42–46, full 3e6 runs, 12-prob snapshot every 10k; leave-one-seed-out | Imitation target never in its own reference family. |
+| Matching | flag=1 exploitability ∈ {0.05, 0.10, 0.20}; anti-policy unmatched | Compare *how* agents play badly, not how badly. |
+| Eval opponent | Uniform random, both seats, identical across flags | Reaches all 12 info states; flag is the only difference. |
+| Capacity ablation | hidden ∈ {128, 8, 2}; fine-tune steps ∈ {100, 1000, to fit} | 128 fits exactly (≈ policy swap); small nets are where leakage can show. |
+| Thresholds | Empirical from honest controls, not χ² | Calibrated FPR; no asymptotic assumptions. |
+| Rigor | Preregister before scoring | Result can't be tuned post hoc. |
+
+**Out of scope:** implicit cues (opponent style), reward-shaped sandbaggers,
+probability-level access, opponent-view observability, response-time signals
+(an MLP forward pass is decision-independent — no honest proxy exists).
+
+## 10. Milestones
+
+### Milestone 7 — Honest family
+- `train.py` appends `{episode, exploitability, probs}` (12 info states) to
+  `<run>/policies.jsonl` at every eval.
+- Train `fam_s42` … `fam_s46` with `configs/kuhn_nfsp.yaml`.
+- **Done when:** 5 × `policies.jsonl` with 300 rows; final exploitability ≤ 0.05.
+
+### Milestone 8 — Preregistration
+- `results/sandbag/prereg.md`: hypotheses, metrics, grids, trial counts, thresholds.
+  - **H1** 128-unit lock: |expl(flag0) − expl(teacher)| ≤ 0.005; |expl(flag1) − level| ≤ 0.01.
+  - **H2** leakage (max per-state |p − target|) larger at 2 units than 128, and at capped steps.
+  - **H3** D2 AUROC ≥ 0.9 at N = 1000 for uniform-mix and anti-policy.
+  - **H4** D2 AUROC ≤ 0.6 for checkpoint-imitation at every N ≤ 10k.
+  - **H5** D1 TPR@5%FPR ≥ 0.8 by N = 10k for every type at levels ≥ 0.10.
+- **Done when:** committed before any detection run.
+
+### Milestone 9 — Password lock (`sandbag.py`)
+- Weak targets from a held-out seed's teacher; `LockedPolicy` (MLP on 12-dim
+  input, KL loss over 6 states × 2 flags per seat). 128 units: warm start from the
+  teacher with a zero-init flag column. 8 / 2 units: distilled from scratch.
+- Honest-lock control (flag1 target = teacher) at every size.
+- `configs/sandbag.yaml`; `tests/test_sandbag.py`.
+- **Done when:** `results/sandbag/lock_table.md` reports expl per flag, leakage,
+  and baseline returns per flag.
+
+### Milestone 10 — Detectors (`detect.py`)
+- Exact sampler: enumerate agent trajectories vs uniform opponent → multinomial
+  over N hands → (info state, action) counts.
+- D1 = summed G on flag × action tables; D2 = min G vs honest family.
+  AUROC + TPR@5%FPR; N ∈ {30, 100, 300, 1k, 3k, 10k}; 200 trials.
+- `tests/test_detect.py` (sampler vs Monte-Carlo, score/AUROC sanity).
+- **Done when:** `results/sandbag/{detection.csv, detection_curves.png, summary.md}`
+  with a pass/fail verdict per hypothesis.
+
+### Milestone 11 — Write-up
+- README "Sandbagging study" section; CLAUDE.md gotchas.
+- **Done when:** results reproducible from the documented `docker run` commands.
