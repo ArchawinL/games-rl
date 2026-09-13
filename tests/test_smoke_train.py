@@ -4,6 +4,7 @@ Not a convergence check — a guardrail that the loop runs, logs, and checkpoint
 """
 
 import csv
+import json
 import pathlib
 
 import torch
@@ -39,6 +40,7 @@ def test_run_produces_all_artifacts(tmp_path):
         "checkpoint_best.pt",
         "checkpoint_final.pt",
         "summary.json",
+        "policies.jsonl",
     ):
         assert (run_dir / name).is_file(), f"missing {name}"
 
@@ -64,3 +66,12 @@ def test_checkpoint_is_loadable(tmp_path):
     assert ckpt["num_actions"] == 2
     assert len(ckpt["avg_network_state_dicts"]) == 2
     assert ckpt["config"]["game"] == "kuhn_poker"
+
+
+def test_policy_snapshots(tmp_path):
+    run_dir = _run(tmp_path, "snap")
+    rows = [json.loads(l) for l in (run_dir / "policies.jsonl").open()]
+    assert [r["episode"] for r in rows] == [200, 400, 600]
+    for r in rows:
+        assert len(r["probs"]) == 12
+        assert all(0.0 <= p <= 1.0 for p in r["probs"].values())

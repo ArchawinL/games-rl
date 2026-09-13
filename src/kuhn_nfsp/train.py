@@ -6,6 +6,7 @@
 Produces, under ``<run_root>/<run_name>/``:
     run_meta.json        config + git SHA + seed + library versions
     metrics.csv          one row per evaluation (nash_conv, exploitability, losses)
+    policies.jsonl       one row per evaluation: P(bet) at all 12 info states
     checkpoint_best.pt    lowest-nash_conv average-policy networks
     checkpoint_final.pt   average-policy networks at the last episode
     summary.json          headline numbers
@@ -31,6 +32,7 @@ import numpy as np
 import torch
 from open_spiel.python import rl_environment
 from open_spiel.python.algorithms.exploitability import nash_conv
+from open_spiel.python.policy import tabular_policy_from_callable
 from open_spiel.python.pytorch.nfsp import NFSP
 
 from kuhn_nfsp.config import TrainConfig, load_config
@@ -150,6 +152,12 @@ def _write_run_meta(run_dir: pathlib.Path, cfg: TrainConfig) -> None:
     (run_dir / "run_meta.json").write_text(json.dumps(meta, indent=2))
 
 
+def policy_table(game, policy) -> dict[str, float]:
+    """P(bet) at every info state, keyed by info-state string (e.g. ``"1pb"``)."""
+    tab = tabular_policy_from_callable(game, policy)
+    return {s: float(tab.action_probability_array[i][1]) for s, i in tab.state_lookup.items()}
+
+
 def _append_row(metrics_path: pathlib.Path, row: dict) -> None:
     with metrics_path.open("a", newline="") as fh:
         csv.DictWriter(fh, METRICS_FIELDS).writerow(row)
@@ -205,6 +213,13 @@ def run_training(cfg: TrainConfig) -> pathlib.Path:
                 "rl_loss_p1": _round(rl1),
             }
             _append_row(metrics_path, row)
+            snapshot = {
+                "episode": episode,
+                "exploitability": row["exploitability"],
+                "probs": policy_table(env.game, avg_policy),
+            }
+            with (run_dir / "policies.jsonl").open("a") as fh:
+                fh.write(json.dumps(snapshot) + "\n")
             last_row = row
             print(
                 f"[ep {episode:>8}]  nash_conv={nc:.5f}  expl={nc / num_players:.5f}"
