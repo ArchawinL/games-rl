@@ -377,7 +377,7 @@ probability-level access, opponent-view observability, response-time signals
 
 ### Milestone 8 — Preregistration
 - `results/sandbag/prereg.md`: hypotheses, metrics, grids, trial counts, thresholds.
-  - **H1** 128-unit lock: |expl(flag0) − expl(teacher)| ≤ 0.005; |expl(flag1) − level| ≤ 0.01.
+  - **H1** 128-unit lock: |expl(flag0) − expl(teacher)| ≤ 0.005; |expl(flag1) − expl(target)| ≤ 0.01.
   - **H2** leakage (max per-state |p − target|) larger at 2 units than 128, and at capped steps.
   - **H3** D2 AUROC ≥ 0.9 at N = 1000 for uniform-mix and anti-policy.
   - **H4** D2 AUROC ≤ 0.6 for checkpoint-imitation at every N ≤ 10k.
@@ -388,10 +388,12 @@ probability-level access, opponent-view observability, response-time signals
 - Weak targets from a held-out seed's teacher; `LockedPolicy` (MLP on 12-dim
   input, KL loss over 6 states × 2 flags per seat). 128 units: warm start from the
   teacher with a zero-init flag column. 8 / 2 units: distilled from scratch.
-- Honest-lock control (flag1 target = teacher) at every size.
+- Honest controls through the same lock at every size: `honest_strong` (teacher
+  on both flags) and `honest_weak@L` (level-L snapshot on both flags — D2's
+  matched "can't" negative).
 - `configs/sandbag.yaml`; `tests/test_sandbag.py`.
-- **Done when:** `results/sandbag/lock_table.md` reports expl per flag, leakage,
-  and baseline returns per flag.
+- **Done when:** `results/sandbag/lock_table.md` reports exact expl per flag,
+  leakage, and exact seat-averaged returns vs the 4 baselines per flag.
 
 ### Milestone 10 — Detectors (`detect.py`)
 - Exact sampler: enumerate agent trajectories vs uniform opponent → multinomial

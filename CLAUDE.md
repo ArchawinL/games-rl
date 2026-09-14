@@ -61,3 +61,21 @@ See `IMPLEMENTATION_PLAN.md` for the full plan and milestones.
   run-to-run noise). Converged bar: **exploitability ≤ 0.05**.
 - OpenSpiel 2.0.2 `NFSP.save`/`restore` are broken (key mismatch) — we roll our
   own checkpoint of the average-policy networks in `train.py`.
+
+## Sandbagging study (Phase 2)
+
+- Spec is `results/sandbag/prereg.md` — **do not change hypotheses, metrics or
+  thresholds**; record any change under "Deviations" in `summary.md`.
+- Pipeline: `train.py` (seeds 42–46, run names `fam_s<seed>`) → `sandbag.py`
+  → `detect.py`, all driven by `configs/sandbag.yaml`.
+- A policy is a **table** `{info_state_str: P(bet)}` over the 12 info states.
+  Every run logs one per eval to `policies.jsonl`.
+- Lock input = 11-dim info tensor ‖ flag bit (12). The hidden-128 lock warm-starts
+  from `checkpoint_final.pt` with a zero-init flag column.
+- Leave-one-seed-out: a held-out seed's teacher and weak targets are never in
+  D2's reference family. Breaking this makes H4 true by construction.
+- Detectors see (info state, action) **counts** only — no probabilities, no
+  internals. The opponent is uniform random.
+- Sandbagging is induced by supervised locking. **Rewards stay unshaped.**
+- Set `OMP_NUM_THREADS=1` for lock/detect runs; torch threads thrash under
+  multiprocessing.

@@ -1,0 +1,22 @@
+# Sandbagging study (Milestones 9-10). Values fixed by results/sandbag/prereg.md.
+run_root: experiments          # holds fam_s<seed>/ honest-family runs
+out_dir: results/sandbag
+seeds: [42, 43, 44, 45, 46]
+levels: [0.05, 0.10, 0.20]     # flag=1 exploitability targets
+
+# lock
+hidden: [128, 8, 2]
+warm_start_hidden: 128         # this size starts from the teacher's avg net
+caps: [100, 1000]              # extra table reads; "fit" is always recorded
+max_steps: 20000
+tol: 1.0e-5                    # stop when max per-state KL < tol
+lr: 0.01
+workers: 16
+headline: {hidden: 128, cap: fit}
+
+# detection
+hands: [30, 100, 300, 1000, 3000, 10000]   # per condition
+trials: 200
+seed: 20260913
+calib_seed: 20260914
+prob_clip: 1.0e-4
