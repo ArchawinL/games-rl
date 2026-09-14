@@ -1,0 +1,9 @@
+{
+  "run_dir": "experiments/fam_s43",
+  "episodes": 3000000,
+  "final_nash_conv": 0.038578,
+  "final_exploitability": 0.019289,
+  "best_nash_conv": 0.032257,
+  "best_exploitability": 0.016128,
+  "elapsed_s": 4140.1
+}

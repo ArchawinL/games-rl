@@ -67,7 +67,9 @@ See `IMPLEMENTATION_PLAN.md` for the full plan and milestones.
 - Spec is `results/sandbag/prereg.md` — **do not change hypotheses, metrics or
   thresholds**; record any change under "Deviations" in `summary.md`.
 - Pipeline: `train.py` (seeds 42–46, run names `fam_s<seed>`) → `sandbag.py`
-  → `detect.py`, all driven by `configs/sandbag.yaml`.
+  → `detect.py`, all driven by `configs/sandbag.yaml`. The family is committed
+  in `results/sandbag/family/` (the config default). Lock + detect regenerate
+  `results/sandbag/` bit-identically from it.
 - A policy is a **table** `{info_state_str: P(bet)}` over the 12 info states.
   Every run logs one per eval to `policies.jsonl`.
 - Lock input = 11-dim info tensor ‖ flag bit (12). The hidden-128 lock warm-starts

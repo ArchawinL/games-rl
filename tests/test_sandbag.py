@@ -52,3 +52,20 @@ def test_build_jobs_matches_levels():
     mix = jobs[3]["t1"]
     assert abs(table_expl(GAME, mix) - 0.10) < 0.01
     assert jobs[4]["t1"] == {s: 1 - p for s, p in NASH.items()}
+
+
+def test_committed_family_regenerates_lock_targets():
+    """results/sandbag/family + build_jobs reproduce every target in locks.jsonl."""
+    import json
+    import pathlib
+
+    from kuhn_nfsp.sandbag import load_cfg, load_family
+
+    cfg = load_cfg("configs/sandbag.yaml")
+    records = [json.loads(line) for line in pathlib.Path(cfg["out_dir"], "locks.jsonl").open()]
+    for seed in cfg["seeds"]:
+        jobs = build_jobs(GAME, load_family(cfg["run_root"], seed), cfg["levels"])
+        expected = {(j["job"], j["level"]): (j["t0"], j["t1"]) for j in jobs}
+        for r in (r for r in records if r["seed"] == seed):
+            t0, t1 = expected[r["job"], r["level"]]
+            assert r["target0"] == pytest.approx(t0) and r["target1"] == pytest.approx(t1)

@@ -55,7 +55,7 @@ Commands are PowerShell; on bash use `"$PWD"`.
 # build
 docker build -t kuhn-nfsp .
 
-# tests (45)
+# tests (46)
 docker run --rm -v ${PWD}:/app kuhn-nfsp pytest -q
 
 # full training run (3e6 episodes, ~44 min CPU) -> experiments/<run_name>/
@@ -143,13 +143,25 @@ All five preregistered hypotheses pass ([`summary.md`](results/sandbag/summary.m
 - **D2's weak honest controls** at 0.10 are themselves flagged ~20% of the time (same score distribution as `imitate@0.10`),
   so D2's false positives concentrate on genuinely weak agents.
 
+**Reproduce.** The honest family is committed in `results/sandbag/family/fam_s<seed>/`:
+`policies.jsonl`, `checkpoint_final.pt`, `metrics.csv`, `run_meta.json` (config,
+seed, git SHA `222c24c`) and `summary.json`. From it, the two commands below regenerate
+every file in `results/sandbag/` **bit-identically** (verified).
+
 ```powershell
-# honest family: 5 full runs (~70 min each, run in parallel)
-docker run --rm -v ${PWD}:/app kuhn-nfsp python -m kuhn_nfsp.train --config configs/kuhn_nfsp.yaml --set seed=42 --set run_name=fam_s42   # … 43–46
-# locks -> results/sandbag/locks.jsonl, lock_table.md (~minutes on 30 workers)
+# locks -> locks.jsonl, lock_table.md (~5 min on 30 workers; lower with --set workers=N)
 docker run --rm -e OMP_NUM_THREADS=1 -v ${PWD}:/app kuhn-nfsp python -m kuhn_nfsp.sandbag --config configs/sandbag.yaml
 # detectors -> detection.csv, detection_curves.png, summary.md
 docker run --rm -e OMP_NUM_THREADS=1 -v ${PWD}:/app kuhn-nfsp python -m kuhn_nfsp.detect --config configs/sandbag.yaml
+```
+
+To regenerate the family too: 5 full training runs (~70 min each, run in parallel).
+NFSP training is only near-deterministic (see Notes), so expect small numeric
+differences downstream.
+
+```powershell
+docker run --rm -v ${PWD}:/app kuhn-nfsp python -m kuhn_nfsp.train --config configs/kuhn_nfsp.yaml --set seed=42 --set run_name=fam_s42   # … 43–46
+# then add  --set run_root=experiments  to the sandbag and detect commands
 ```
 
 ## Layout
@@ -168,9 +180,9 @@ docs/
   api_spike.py         runnable OpenSpiel API exploration
   openspiel_notes.md   the API concepts in prose
 configs/         kuhn_nfsp.yaml (full), kuhn_nfsp_smoke.yaml, sandbag.yaml
-tests/           45 tests (baselines, config, smoke-train, evaluate, sandbag, detect)
+tests/           46 tests (baselines, config, smoke-train, evaluate, sandbag, detect)
 results/         committed artifacts: figures, summary, seed-42 checkpoint + metrics;
-                 sandbag/ prereg, locks, detection results
+                 sandbag/ prereg, honest family (5 runs), locks, detection results
 experiments/     gitignored: full run outputs
 ```
 
@@ -192,10 +204,11 @@ experiments/     gitignored: full run outputs
 ```powershell
 git clone https://github.com/ArchawinL/games-rl && cd games-rl
 docker build -t kuhn-nfsp .
-docker run --rm -v ${PWD}:/app kuhn-nfsp pytest -q                                   # 45 pass
+docker run --rm -v ${PWD}:/app kuhn-nfsp pytest -q                                   # 46 pass
 docker run --rm -v ${PWD}:/app kuhn-nfsp python -m kuhn_nfsp.train --config configs/kuhn_nfsp_smoke.yaml
 ```
 
 A full reproduction of the headline numbers is three `--config configs/kuhn_nfsp.yaml`
 runs at `--set seed=42/43/44` (~2.2 h CPU total), then the `evaluate` and
-`plotting` commands above.
+`plotting` commands above. The sandbagging study reproduces from committed
+artifacts in ~10 min (see "Sandbagging study → Reproduce").

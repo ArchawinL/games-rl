@@ -1,5 +1,5 @@
 # Sandbagging study (Milestones 9-10). Values fixed by results/sandbag/prereg.md.
-run_root: experiments          # holds fam_s<seed>/ honest-family runs
+run_root: results/sandbag/family  # fam_s<seed>/ runs; set run_root=experiments after retraining
 out_dir: results/sandbag
 seeds: [42, 43, 44, 45, 46]
 levels: [0.05, 0.10, 0.20]     # flag=1 exploitability targets
