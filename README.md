@@ -135,8 +135,36 @@ All five preregistered hypotheses pass ([`summary.md`](results/sandbag/summary.m
 
 ![sandbagging detection curves](results/sandbag/detection_curves.png)
 
-Interpretation and references (NFSP; password-locked models; the sandbagging
-definition) are in [`results/sandbag/summary.md`](results/sandbag/summary.md).
+**What this shows.** Detectability turns on what the evaluator can see, not on how
+big the gap is:
+
+- **Eval-only behaviour is not enough.** Against imitation of a genuinely weaker
+  agent the eval-only detector stays at chance however many hands it gets —
+  deliberate underperformance and real incompetence are the *same* behaviour. It
+  does catch weak play that is off-distribution (`mix`, `anti`), so it tests
+  *plausibility*, not intent.
+- **Being able to flip the cue is what pays.** The paired detector catches every
+  sandbagger here. The lesson is to invest in evaluation conditions a model cannot
+  tell from deployment, rather than in cleverer behavioural statistics.
+- **A benchmark score is the wrong instrument.** `imitate@0.20` *wins more* chips
+  against the fixed opponent while sandbagging, because the weaker snapshot it
+  copies over-bets. Measured weakness and measured score can move in opposite
+  directions.
+- **Weight sharing leaves only a faint trace.** Forcing both behaviours into 2
+  hidden units produces leakage (0.345 vs 0.0014 at 128), but lifts eval-only
+  AUROC against imitation only to ~0.60 — while making paired detection *worse*.
+  Capacity pressure is not a reliable tell.
+
+Full numbers, per-hypothesis verdicts and the ablation:
+[`results/sandbag/summary.md`](results/sandbag/summary.md).
+
+**References.**
+
+- Heinrich & Silver (2016), *Deep RL from Self-Play in Imperfect-Information Games* — NFSP. [arXiv:1603.01121](https://arxiv.org/abs/1603.01121)
+- Greenblatt, Roger, Krasheninnikov & Krueger (2024), *Stress-Testing Capability Elicitation With Password-Locked Models* — the locking method borrowed here. [arXiv:2405.19550](https://arxiv.org/abs/2405.19550)
+- van der Weij, Hofstätter, Jaffe, Brown & Ward (2024), *AI Sandbagging: Language Models can Strategically Underperform on Evaluations* — the phenomenon modelled. [arXiv:2406.07358](https://arxiv.org/abs/2406.07358)
+- Hanley & McNeil (1982), *The meaning and use of the area under a ROC curve*, Radiology 143(1) — AUROC standard error.
+- Lanctot et al. (2019), *OpenSpiel: A Framework for Reinforcement Learning in Games*. [arXiv:1908.09453](https://arxiv.org/abs/1908.09453)
 
 **Limits.**
 - **Tiny policy:** 12 probabilities, so the lock is effectively a table swap at
