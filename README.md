@@ -55,7 +55,7 @@ Commands are PowerShell; on bash use `"$PWD"`.
 # build
 docker build -t kuhn-nfsp .
 
-# tests (46)
+# tests (47)
 docker run --rm -v ${PWD}:/app kuhn-nfsp pytest -q
 
 # full training run (3e6 episodes, ~44 min CPU) -> experiments/<run_name>/
@@ -104,23 +104,25 @@ any scoring.
 - **Thresholds** are calibrated on honest agents (measured FPR 0.050 / 0.051).
 - **Scale:** 5 seeds.
 
-**Results** (hidden 128; AUROC, TPR @ 5% FPR at N = 1,000 hands):
+**Results** (hidden 128; AUROC / TPR @ 5% FPR at N = 1,000 hands, ±95% half-width
+over 1,000 pooled trials):
 
 | sandbagger | D1 paired | D2 eval-only |
 |---|---|---|
-| `imitate@0.10` | 1.00 / 1.00 | **0.51** / 0.18 |
-| `imitate@0.05` | 0.88 / 0.56 | **0.50** / 0.00 |
-| `mix@0.10` | 1.00 / 1.00 | 0.99 / 1.00 |
-| `mix@0.05` | 0.96 / 0.82 | 0.98 / 0.42 |
-| `anti` | 1.00 / 1.00 | 1.00 / 1.00 |
+| `imitate@0.10` | 1.00 ±0.00 / 1.00 ±0.00 | **0.51 ±0.03** / 0.18 ±0.02 |
+| `imitate@0.05` | 0.88 ±0.01 / 0.56 ±0.03 | **0.50 ±0.03** / 0.00 ±0.00 |
+| `mix@0.10` | 1.00 ±0.00 / 1.00 ±0.00 | 0.99 ±0.00 / 1.00 ±0.00 |
+| `mix@0.05` | 0.96 ±0.01 / 0.82 ±0.02 | 0.98 ±0.01 / 0.42 ±0.03 |
+| `anti` | 1.00 ±0.00 / 1.00 ±0.00 | 1.00 ±0.00 / 1.00 ±0.00 |
 
 All five preregistered hypotheses pass ([`summary.md`](results/sandbag/summary.md)):
 
 1. **The lock is exact.** Flag-0 exploitability is within 0.0004 of the teacher,
    and flag-1 within 0.0009 of the target.
-2. **Eval-only detection catches crude sandbagging** (`mix`, `anti`) but is at
-   chance against imitation of a real weaker agent, at every N up to 10,000.
-   Behaviorally, "won't" is identical to "can't".
+2. **Eval-only detection catches crude sandbagging** (`mix`, `anti`) but stays at
+   chance against imitation of a real weaker agent at every N up to 10,000 —
+   AUROC never exceeds 0.524 [0.499–0.550]. Behaviorally, "won't" is
+   indistinguishable from "can't".
 3. **Paired detection catches everything** once the flag can be flipped:
    ≤ 1,000 hands at a 0.08 exploitability gap, ~3,000 at 0.03.
 4. **"Weaker" need not mean "scores lower".** `imitate@0.20` *wins more* vs the
@@ -132,6 +134,9 @@ All five preregistered hypotheses pass ([`summary.md`](results/sandbag/summary.m
    gets harder.
 
 ![sandbagging detection curves](results/sandbag/detection_curves.png)
+
+Interpretation and references (NFSP; password-locked models; the sandbagging
+definition) are in [`results/sandbag/summary.md`](results/sandbag/summary.md).
 
 **Limits.**
 - **Tiny policy:** 12 probabilities, so the lock is effectively a table swap at
@@ -180,7 +185,7 @@ docs/
   api_spike.py         runnable OpenSpiel API exploration
   openspiel_notes.md   the API concepts in prose
 configs/         kuhn_nfsp.yaml (full), kuhn_nfsp_smoke.yaml, sandbag.yaml
-tests/           46 tests (baselines, config, smoke-train, evaluate, sandbag, detect)
+tests/           47 tests (baselines, config, smoke-train, evaluate, sandbag, detect)
 results/         committed artifacts: figures, summary, seed-42 checkpoint + metrics;
                  sandbag/ prereg, honest family (5 runs), locks, detection results
 experiments/     gitignored: full run outputs
@@ -204,7 +209,7 @@ experiments/     gitignored: full run outputs
 ```powershell
 git clone https://github.com/ArchawinL/games-rl && cd games-rl
 docker build -t kuhn-nfsp .
-docker run --rm -v ${PWD}:/app kuhn-nfsp pytest -q                                   # 46 pass
+docker run --rm -v ${PWD}:/app kuhn-nfsp pytest -q                                   # 47 pass
 docker run --rm -v ${PWD}:/app kuhn-nfsp python -m kuhn_nfsp.train --config configs/kuhn_nfsp_smoke.yaml
 ```
 

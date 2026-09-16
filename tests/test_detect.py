@@ -70,3 +70,15 @@ def test_d2_family_membership():
 def test_auroc_extremes():
     assert auroc(np.array([2.0, 3.0]), np.array([0.0, 1.0])) == 1.0
     assert auroc(np.array([1.0, 1.0]), np.array([1.0, 1.0])) == 0.5
+
+
+def test_interval_helpers():
+    from kuhn_nfsp.detect import auroc_ci, wilson_ci
+
+    lo, hi = wilson_ci(50, 100)  # textbook Wilson 95% interval for 50/100
+    assert (round(lo, 3), round(hi, 3)) == (0.404, 0.596)
+    assert wilson_ci(200, 200) == (0.9812, 1.0)  # no overflow past 1
+    lo, hi = auroc_ci(0.75, 200, 200)
+    assert lo < 0.75 < hi
+    tight_lo, tight_hi = auroc_ci(0.75, 2000, 2000)
+    assert (tight_hi - tight_lo) < (hi - lo)  # more samples -> narrower
