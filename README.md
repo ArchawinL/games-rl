@@ -97,6 +97,21 @@ results/         committed artifacts: figures, summary, seed-42 checkpoint + met
 experiments/     gitignored: full run outputs
 ```
 
+## Follow-on work: sandbagging study (branch `sandbagging-study`)
+
+A second phase builds a **model organism of evaluation sandbagging** on this same
+agent: the trained policy is password-locked to play weak when an "evaluation"
+flag bit is set, while keeping full strength with the flag off — then behavioral
+detectors are scored against it (sampled actions only, never the model's internals).
+
+Headline: an eval-only detector cannot tell a sandbagger imitating a genuinely
+weaker agent from that weaker agent (AUROC ≤ 0.524 at up to 10,000 hands), while
+a detector that can flip the flag catches every sandbagger tested. All five
+hypotheses were preregistered before scoring.
+
+It lives on the **`sandbagging-study`** branch (not merged): see that branch's
+README section "Sandbagging study" and `results/sandbag/summary.md`.
+
 ## Notes & limitations
 
 - **Kuhn only**, by design — small enough that exploitability is computed exactly,
